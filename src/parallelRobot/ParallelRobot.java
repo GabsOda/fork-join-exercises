@@ -1,5 +1,8 @@
 package parallelRobot;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.RecursiveTask;
 
 public class ParallelRobot extends RecursiveTask<Long> {
@@ -16,21 +19,23 @@ public class ParallelRobot extends RecursiveTask<Long> {
 
     @Override
     protected Long compute() {
-        //System.out.println(Thread.currentThread().getName());
-        if (divided == true) {
+        if(x < 5 && x < 5 || divided == true) {
             return countPaths(x, y); 
+        }else {
+            return ParallelRobot.invokeAll(createSubtasks(x, y))
+                .stream()
+                .mapToLong(ParallelRobot::join)
+                .sum(); 
         }
+    }
 
-        ParallelRobot pr1 = new ParallelRobot(x - 1, y, true);
-        ParallelRobot pr2 = new ParallelRobot(x, y - 1, true); 
+    private Collection<ParallelRobot> createSubtasks(long x, long y) {
+        List<ParallelRobot> subtasks = new ArrayList<>(); 
 
-        pr1.fork();
-        pr2.fork(); 
+        subtasks.add(new ParallelRobot(x - 1, y, true)); 
+        subtasks.add(new ParallelRobot(x, y - 1, true));
 
-        long pr1Result = pr1.join(); 
-        long pr2Result = pr2.join(); 
-
-        return pr1Result + pr2Result; 
+        return subtasks; 
     }
 
     public long countPaths(long x, long y) {
